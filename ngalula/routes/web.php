@@ -26,13 +26,46 @@ Route::get('/test', function () {
     return view('test');
 })->name('test');
 
-// Authentication routes
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'webLogin']);
-    Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
-    Route::post('/register', [AuthController::class, 'webRegister']);
-});
+// ==========================================
+// ROLE-SPECIFIC AUTHENTICATION ROUTES
+// ==========================================
+
+// Customer login
+Route::get('/login/customer', [AuthController::class, 'showCustomerLoginForm'])->name('login.customer')->middleware('guest');
+Route::post('/login/customer', [AuthController::class, 'handleCustomerLogin'])->name('login.customer.store')->middleware('guest');
+
+// Therapist login
+Route::get('/login/therapist', [AuthController::class, 'showTherapistLoginForm'])->name('login.therapist')->middleware('guest');
+Route::post('/login/therapist', [AuthController::class, 'handleTherapistLogin'])->name('login.therapist.store')->middleware('guest');
+
+// Admin login
+Route::get('/login/admin', [AuthController::class, 'showAdminLoginForm'])->name('login.admin')->middleware('guest');
+Route::post('/login/admin', [AuthController::class, 'handleAdminLogin'])->name('login.admin.store')->middleware('guest');
+
+// Customer registration
+Route::get('/register/customer', [AuthController::class, 'showCustomerRegistrationForm'])->name('register.customer')->middleware('guest');
+Route::post('/register/customer', [AuthController::class, 'handleCustomerRegister'])->name('register.customer.store')->middleware('guest');
+
+// Therapist registration
+Route::get('/register/therapist', [AuthController::class, 'showTherapistRegistrationForm'])->name('register.therapist')->middleware('guest');
+Route::post('/register/therapist', [AuthController::class, 'handleTherapistRegister'])->name('register.therapist.store')->middleware('guest');
+
+// Admin registration
+Route::get('/register/admin', [AuthController::class, 'showAdminRegistrationForm'])->name('register.admin')->middleware('guest');
+Route::post('/register/admin', [AuthController::class, 'handleAdminRegister'])->name('register.admin.store')->middleware('guest');
+
+// Legacy auth routes (redirect to role-specific pages)
+Route::get('/login', function () {
+    return redirect()->route('login.customer');
+})->name('login')->middleware('guest');
+
+Route::get('/register', function () {
+    return redirect()->route('register.customer');
+})->name('register')->middleware('guest');
+
+// Legacy POST routes now redirect to role-specific handlers
+// Legacy POST routes - removed in favor of role-specific POST routes above
+// All forms now POST directly to role-specific route names (e.g., 'login.customer.store')
 
 Route::post('/logout', [AuthController::class, 'webLogout'])->name('logout')->middleware('auth');
 

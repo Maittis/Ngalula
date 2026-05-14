@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/user.dart';
-import '../../../core/repositories/auth_repository.dart';
+import '../../../data/repositories/auth_repository.dart';
 
 // States
 abstract class AuthState {}

@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 class AuthController extends Controller
 {
     /**
-     * User registration
+     * User registration (API)
      */
     public function register(Request $request)
     {
@@ -29,10 +29,13 @@ class AuthController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Additional validation for admin roles
+        // Additional validation for admin roles - requires admin authorization key
         if (in_array($request->user_type, ['admin', 'super_admin'])) {
-            // In production, you might want to add additional verification
-            // For now, we'll allow it but you could add admin invitation codes
+            $adminKey = $request->input('admin_key');
+            $validKeys = array_map('trim', explode(',', env('ADMIN_AUTH_KEYS', 'admin-secret-key-2024')));
+            if (!$adminKey || !in_array($adminKey, $validKeys)) {
+                return response()->json(['errors' => ['admin_key' => ['Invalid or missing admin authorization key.']]], 422);
+            }
         }
 
         $user = User::create([
@@ -60,7 +63,7 @@ class AuthController extends Controller
     }
 
     /**
-     * User login
+     * User login (API)
      */
     public function login(Request $request)
     {
@@ -256,24 +259,263 @@ class AuthController extends Controller
         return response()->json(['message' => 'Invalid 2FA code'], 422);
     }
 
+    // ==========================================
+    // ROLE-SPECIFIC LOGIN FORMS
+    // ==========================================
+
     /**
-     * Show login form
+     * Show customer login form
      */
-    public function showLoginForm()
+    public function showCustomerLoginForm()
     {
-        return view('auth.login');
+        return view('auth.customer.login');
     }
 
     /**
-     * Show registration form
+     * Show therapist login form
      */
-    public function showRegistrationForm()
+    public function showTherapistLoginForm()
     {
-        return view('auth.register');
+        return view('auth.therapist.login');
     }
 
     /**
-     * Handle web registration
+     * Show admin login form
+     */
+    public function showAdminLoginForm()
+    {
+        return view('auth.admin.login');
+    }
+
+    // ==========================================
+    // ROLE-SPECIFIC REGISTRATION FORMS
+    // ==========================================
+
+    /**
+     * Show customer registration form
+     */
+    public function showCustomerRegistrationForm()
+    {
+        return view('auth.customer.register');
+    }
+
+    /**
+     * Show therapist registration form
+     */
+    public function showTherapistRegistrationForm()
+    {
+        return view('auth.therapist.register');
+    }
+
+    /**
+     * Show admin registration form
+     */
+    public function showAdminRegistrationForm()
+    {
+        return view('auth.admin.register');
+    }
+
+    // ==========================================
+    // ROLE-SPECIFIC LOGIN HANDLERS
+    // ==========================================
+
+    /**
+     * Handle customer login
+     */
+    public function handleCustomerLogin(Request $request)
+    {
+        return $this->authenticateByRole($request, 'customer');
+    }
+
+    /**
+     * Handle therapist login
+     */
+    public function handleTherapistLogin(Request $request)
+    {
+        return $this->authenticateByRole($request, 'therapist');
+    }
+
+    /**
+     * Handle admin login
+     */
+    public function handleAdminLogin(Request $request)
+    {
+        return $this->authenticateByRole($request, ['admin', 'super_admin']);
+    }
+
+    // ==========================================
+    // ROLE-SPECIFIC REGISTRATION HANDLERS
+    // ==========================================
+
+    /**
+     * Handle customer registration
+     */
+    public function handleCustomerRegister(Request $request)
+    {
+        return $this->registerByRole($request, 'customer');
+    }
+
+    /**
+     * Handle therapist registration
+     */
+    public function handleTherapistRegister(Request $request)
+    {
+        return $this->registerByRole($request, 'therapist');
+    }
+
+    /**
+     * Handle admin registration
+     */
+    public function handleAdminRegister(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'admin_key' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors(['admin_key' => 'Admin authorization key is required.'])->withInput();
+        }
+
+        // Verify admin authorization key from environment configuration
+        $validKeys = array_map('trim', explode(',', env('ADMIN_AUTH_KEYS', 'admin-secret-key-2024')));
+        if (!in_array($request->admin_key, $validKeys)) {
+            return back()->withErrors(['admin_key' => 'Invalid admin authorization key.'])->withInput();
+        }
+
+        return $this->registerByRole($request, 'admin');
+    }
+
+    /**
+     * Authenticate user by role
+     */
+    private function authenticateByRole(Request $request, $allowedRoles)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            
+            $user = Auth::user();
+            $allowedRoles = is_array($allowedRoles) ? $allowedRoles : [$allowedRoles];
+
+            // Check if user has the correct role
+            if (!in_array($user->user_type, $allowedRoles)) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'This account does not have the required permissions for this portal.',
+                ])->onlyInput('email');
+            }
+
+            if (!$user->is_active) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'This account has been deactivated.',
+                ])->onlyInput('email');
+            }
+
+            // Redirect based on user type
+            switch ($user->user_type) {
+                case 'therapist':
+                    return redirect()->route('therapist.dashboard')->with('success', 'Welcome back!');
+                case 'admin':
+                case 'super_admin':
+                    return redirect()->route('admin.dashboard')->with('success', 'Welcome back!');
+                case 'receptionist':
+                    return redirect()->route('receptionist.dashboard')->with('success', 'Welcome back!');
+                case 'customer':
+                    return redirect()->route('customer.dashboard')->with('success', 'Welcome back!');
+                default:
+                    return redirect()->intended('/');
+            }
+        }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
+    }
+
+    /**
+     * Register user by role
+     */
+    private function registerByRole(Request $request, string $userType)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'phone' => 'required|string|unique:users',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'phone' => $request->phone,
+            'user_type' => $userType,
+        ]);
+
+        // Auto-login the user after registration
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        // Redirect based on user type
+        switch ($userType) {
+            case 'therapist':
+                return redirect()->route('therapist.dashboard')->with('success', 'Account created successfully! Welcome to the team.');
+            case 'admin':
+            case 'super_admin':
+                return redirect()->route('admin.dashboard')->with('success', 'Admin account created successfully!');
+            case 'receptionist':
+                return redirect()->route('receptionist.dashboard')->with('success', 'Account created successfully!');
+            default:
+                return redirect()->route('customer.dashboard')->with('success', 'Welcome! Your account has been created.');
+        }
+    }
+
+    /**
+     * Handle web login (generic - kept for backward compatibility)
+     */
+    public function webLogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            
+            // Redirect based on user type
+            $user = Auth::user();
+            switch ($user->user_type) {
+                case 'therapist':
+                    return redirect()->route('therapist.dashboard');
+                case 'admin':
+                case 'super_admin':
+                    return redirect()->route('admin.dashboard');
+                case 'receptionist':
+                    return redirect()->route('receptionist.dashboard');
+                case 'customer':
+                    return redirect()->route('customer.dashboard');
+                default:
+                    return redirect()->intended('/');
+            }
+        }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
+    }
+
+    /**
+     * Handle web registration (generic - kept for backward compatibility)
      */
     public function webRegister(Request $request)
     {
@@ -316,38 +558,19 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle web login
+     * Show login form (generic - kept for backward compatibility)
      */
-    public function webLogin(Request $request)
+    public function showLoginForm()
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        return view('auth.login');
+    }
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            
-            // Redirect based on user type
-            $user = Auth::user();
-            switch ($user->user_type) {
-                case 'therapist':
-                    return redirect()->route('therapist.dashboard');
-                case 'admin':
-                case 'super_admin':
-                    return redirect()->route('admin.dashboard');
-                case 'receptionist':
-                    return redirect()->route('receptionist.dashboard');
-                case 'customer':
-                    return redirect()->route('customer.dashboard');
-                default:
-                    return redirect()->intended('/');
-            }
-        }
-
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+    /**
+     * Show registration form (generic - kept for backward compatibility)
+     */
+    public function showRegistrationForm()
+    {
+        return view('auth.register');
     }
 
     /**
@@ -512,7 +735,6 @@ class AuthController extends Controller
     private function generate2FAQRCode(string $secret, string $email): string
     {
         // TODO: Implement QR code generation
-        // You can use a package like "simplesoftwareio/simple-qrcode"
         return "otpauth://totp/SpaApp:$email?secret=$secret&issuer=SpaApp";
     }
 
@@ -522,7 +744,6 @@ class AuthController extends Controller
     private function verify2FACode(string $encryptedSecret, string $code): bool
     {
         // TODO: Implement actual TOTP verification
-        // You can use a package like "spatie/otp"
         return true; // Placeholder
     }
 }

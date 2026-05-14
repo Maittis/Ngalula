@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/config/app_config.dart';
-import '../../../core/config/routes/app_utils.dart';
-import '../../../core/services/user_journey_service.dart';
-import '../../../presentation/widgets/common/animated_button.dart';
-import '../../../presentation/widgets/common/gradient_background.dart';
+import '../../../core/config/routes/app_router.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -156,13 +153,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_completed', true);
     
-    // Initialize user journey
-    final userJourneyService = UserJourneyService();
-    await userJourneyService.initializeJourney();
-    
-    // Navigate to main app
+    // Navigate to login
     if (mounted) {
-      RouteUtils.navigateToHome();
+      RouteUtils.navigateToLogin();
     }
   }
 
@@ -313,12 +306,30 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     // Next/Get Started button
                     Expanded(
                       flex: 2,
-                      child: AnimatedButton(
-                        text: _isLastPage ? 'Get Started' : 'Next',
+                      child: ElevatedButton(
                         onPressed: _onNextPressed,
-                        backgroundColor: Colors.white,
-                        textColor: page.backgroundColor,
-                        icon: _isLastPage ? Icons.check_circle : Icons.arrow_forward,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: page.backgroundColor,
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _isLastPage ? 'Get Started' : 'Next',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(_isLastPage ? Icons.check_circle : Icons.arrow_forward),
+                          ],
+                        ),
                       ),
                     ),
                   ],

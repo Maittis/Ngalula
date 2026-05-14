@@ -30,11 +30,24 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#contact">Contact</a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm ms-2">Login</a>
+                    <li class="nav-item dropdown">
+                        <a class="btn btn-outline-primary btn-sm ms-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('login.customer') }}"><i class="fas fa-user me-2"></i>Customer</a></li>
+                            <li><a class="dropdown-item" href="{{ route('login.therapist') }}"><i class="fas fa-user-md me-2"></i>Therapist</a></li>
+                            <li><a class="dropdown-item" href="{{ route('login.admin') }}"><i class="fas fa-user-shield me-2"></i>Admin</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a href="{{ route('register') }}" class="btn btn-primary btn-sm ms-2">Sign Up</a>
+                    <li class="nav-item dropdown">
+                        <a class="btn btn-primary btn-sm ms-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-plus me-1"></i> Sign Up
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('register.customer') }}"><i class="fas fa-user me-2"></i>Customer</a></li>
+                            <li><a class="dropdown-item" href="{{ route('register.therapist') }}"><i class="fas fa-user-md me-2"></i>Therapist</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>

@@ -5,6 +5,7 @@ class User {
   final String email;
   final String? phone;
   final String? avatar;
+  final String? userType;
   final int? rewardPoints;
   final String? membershipTier;
   final DateTime? membershipExpiry;
@@ -18,6 +19,7 @@ class User {
     required this.email,
     this.phone,
     this.avatar,
+    this.userType,
     this.rewardPoints,
     this.membershipTier,
     this.membershipExpiry,
@@ -27,18 +29,23 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] ?? '',
-      firstName: json['first_name'] ?? '',
-      lastName: json['last_name'] ?? '',
+      id: json['id']?.toString() ?? '',
+      firstName: json['first_name'] ?? json['name']?.toString().split(' ').first ?? '',
+      lastName: json['last_name'] ?? json['name']?.toString().contains(' ') == true
+          ? json['name'].toString().split(' ').sublist(1).join(' ')
+          : '',
       email: json['email'] ?? '',
       phone: json['phone'],
-      avatar: json['avatar'],
+      avatar: json['avatar'] ?? json['profile_photo_url'],
+      userType: json['user_type'],
       rewardPoints: json['reward_points'],
       membershipTier: json['membership_tier'],
-      membershipExpiry: json['membership_expiry'] != null 
-          ? DateTime.parse(json['membership_expiry'])
+      membershipExpiry: json['membership_expiry'] != null
+          ? DateTime.tryParse(json['membership_expiry'])
           : null,
-      preferences: List<String>.from(json['preferences'] ?? []),
+      preferences: json['preferences'] != null
+          ? List<String>.from(json['preferences'])
+          : [],
       profile: json['profile'] ?? {},
     );
   }
@@ -51,6 +58,7 @@ class User {
       'email': email,
       'phone': phone,
       'avatar': avatar,
+      'user_type': userType,
       'reward_points': rewardPoints,
       'membership_tier': membershipTier,
       'membership_expiry': membershipExpiry?.toIso8601String(),
@@ -66,6 +74,7 @@ class User {
     String? email,
     String? phone,
     String? avatar,
+    String? userType,
     int? rewardPoints,
     String? membershipTier,
     DateTime? membershipExpiry,
@@ -79,6 +88,7 @@ class User {
       email: email ?? this.email,
       phone: phone ?? this.phone,
       avatar: avatar ?? this.avatar,
+      userType: userType ?? this.userType,
       rewardPoints: rewardPoints ?? this.rewardPoints,
       membershipTier: membershipTier ?? this.membershipTier,
       membershipExpiry: membershipExpiry ?? this.membershipExpiry,
@@ -86,6 +96,21 @@ class User {
       profile: profile ?? this.profile,
     );
   }
+
+  /// Check if user is a customer
+  bool get isCustomer => userType == 'customer';
+
+  /// Check if user is a therapist
+  bool get isTherapist => userType == 'therapist';
+
+  /// Check if user is an admin
+  bool get isAdmin => userType == 'admin' || userType == 'super_admin';
+
+  /// Check if user is staff (therapist, admin, etc.)
+  bool get isStaff => isTherapist || isAdmin;
+
+  /// Get display name
+  String get displayName => '$firstName $lastName';
 
   @override
   bool operator ==(Object other) {
@@ -98,7 +123,7 @@ class User {
 
   @override
   String toString() {
-    return 'User{id: $id, name: $firstName $lastName}';
+    return 'User{id: $id, name: $displayName, type: $userType}';
   }
 }
 
@@ -111,6 +136,7 @@ User getSampleUser() {
     email: 'john.doe@example.com',
     phone: '+250 788 123 456',
     avatar: 'https://picsum.photos/seed/user1/200/200.jpg',
+    userType: 'customer',
     rewardPoints: 250,
     membershipTier: 'Gold',
     membershipExpiry: DateTime.now().add(const Duration(days: 365)),
