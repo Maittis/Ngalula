@@ -184,9 +184,9 @@
                         <td><span class="booking-status status-confirmed">Confirmed</span></td>
                         <td>ZMW 800</td>
                         <td>
-                            <button class="btn btn-sm btn-primary" onclick="viewBooking('#247')">View</button>
-                            <button class="btn btn-sm btn-warning" onclick="editBooking('#247')">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteBooking('#247')">Delete</button>
+                            <button class="btn btn-sm btn-primary" onclick="viewBooking('#247', event)">View</button>
+                            <button class="btn btn-sm btn-warning" onclick="editBooking('#247', event)">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteBooking('#247', event)">Delete</button>
                         </td>
                     </tr>
                     <tr class="booking-row clickable" data-booking-id="#248">
@@ -199,9 +199,9 @@
                         <td><span class="booking-status status-pending">Pending</span></td>
                         <td>ZMW 1,000</td>
                         <td>
-                            <button class="btn btn-sm btn-primary" onclick="viewBooking('#248')">View</button>
-                            <button class="btn btn-sm btn-warning" onclick="editBooking('#248')">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteBooking('#248')">Delete</button>
+                            <button class="btn btn-sm btn-primary" onclick="viewBooking('#248', event)">View</button>
+                            <button class="btn btn-sm btn-warning" onclick="editBooking('#248', event)">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteBooking('#248', event)">Delete</button>
                         </td>
                     </tr>
                     <tr class="booking-row clickable" data-booking-id="#249">
@@ -214,9 +214,9 @@
                         <td><span class="booking-status status-completed">Completed</span></td>
                         <td>ZMW 1,200</td>
                         <td>
-                            <button class="btn btn-sm btn-primary" onclick="viewBooking('#249')">View</button>
-                            <button class="btn btn-sm btn-warning" onclick="editBooking('#249')">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteBooking('#249')">Delete</button>
+                            <button class="btn btn-sm btn-primary" onclick="viewBooking('#249', event)">View</button>
+                            <button class="btn btn-sm btn-warning" onclick="editBooking('#249', event)">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteBooking('#249', event)">Delete</button>
                         </td>
                     </tr>
                 </tbody>
@@ -238,14 +238,20 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // View booking details
-function viewBooking(bookingId) {
+function viewBooking(bookingId, event) {
+    event.stopPropagation();
     console.log('Viewing booking:', bookingId);
     showBookingDetails(bookingId);
 }
 
 // Edit booking
-function editBooking(bookingId) {
+function editBooking(bookingId, event) {
+    event.stopPropagation();
     console.log('Editing booking:', bookingId);
+    
+    // Find the booking row to get current data
+    const bookingRow = document.querySelector(`[data-booking-id="${bookingId}"]`);
+    const cells = bookingRow.querySelectorAll('td');
     
     // Create edit modal
     const modal = document.createElement('div');
@@ -267,13 +273,13 @@ function editBooking(bookingId) {
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Customer Name</label>
-                                    <input type="text" class="form-control" id="customerName" value="John Doe">
+                                    <input type="text" class="form-control" id="customerName" value="${cells[1].textContent}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Service</label>
                                     <select class="form-control" id="service">
-                                        <option value="Swedish Massage">Swedish Massage</option>
-                                        <option value="Deep Tissue Massage">Deep Tissue Massage</option>
+                                        <option value="Swedish Massage" ${cells[2].textContent === 'Swedish Massage' ? 'selected' : ''}>Swedish Massage</option>
+                                        <option value="Deep Tissue Massage" ${cells[2].textContent === 'Deep Tissue Massage' ? 'selected' : ''}>Deep Tissue Massage</option>
                                         <option value="Hot Stone Therapy">Hot Stone Therapy</option>
                                     </select>
                                 </div>
@@ -365,7 +371,8 @@ function saveBooking(bookingId) {
 }
 
 // Delete booking
-function deleteBooking(bookingId) {
+function deleteBooking(bookingId, event) {
+    event.stopPropagation();
     console.log('Deleting booking:', bookingId);
     
     if (confirm(`Are you sure you want to delete booking ${bookingId}? This action cannot be undone.`)) {
