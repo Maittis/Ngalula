@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ngalula Unified App (Preview)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>html,body,#root{height:100%;margin:0}body{background:#08070f;color:#e8d5b7;font-family:'DM Sans',sans-serif}</style>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useMemo, useEffect, useCallback } = React;
+
+// Paste the JSX app code below (modified to run in-browser)
+
+// SHARED SEED DATA
+const SERVICES_LIST = [
+  {name:"Swedish Massage",                              cat:"Massage",                price:550},
+  {name:"Aromatherapy Massage",                         cat:"Massage",                price:650},
+  {name:"Pregnancy Massage",                            cat:"Massage",                price:800},
+  {name:"Ngalula Signature Massage",                    cat:"Massage",                price:800},
+  {name:"Balcony Massage",                              cat:"Massage",                price:800},
+  {name:"Ngalula Yondolola Massage",                    cat:"Massage",                price:850},
+  {name:"Deep Tissue Massage",                          cat:"Massage",                price:850},
+  {name:"Ukuchina Massage",                             cat:"Massage",                price:950},
+  {name:"Ngalula Recovery Massage",                     cat:"Massage",                price:1250},
+  {name:"Ngalula Healing Massage",                      cat:"Massage",                price:1250},
+  {name:"Ngalula Post-Surgery/Post-Sickness Massage",   cat:"Massage",                price:1250},
+  {name:"Ngalula New Mommy Massage",                    cat:"Massage",                price:1250},
+  {name:"Couples' Massage",                             cat:"Massage",                price:1500},
+  {name:"Ngalula Full Gel Pedicure",                    cat:"Pedicures & Body Scrubs",price:450},
+  {name:"Men's Premium Pedicure",                       cat:"Pedicures & Body Scrubs",price:525},
+  {name:"Men's Premium Pedicure & Manicure",            cat:"Pedicures & Body Scrubs",price:800},
+  {name:"Body Scrub",                                   cat:"Pedicures & Body Scrubs",price:550},
+  {name:"Body Scrub and Wipe Off",                      cat:"Pedicures & Body Scrubs",price:750},
+  {name:"Steaming Body Scrub",                          cat:"Pedicures & Body Scrubs",price:850},
+  {name:"Full Body Scrub Experience",                   cat:"Pedicures & Body Scrubs",price:1000},
+  {name:"Full Body Scrub Experience & Swedish Massage", cat:"Pedicures & Body Scrubs",price:1500},
+  {name:"Deep Cleanse Facial",                          cat:"Facials",                price:612},
+  {name:"Extraction Facial",                            cat:"Facials",                price:850},
+  {name:"Dermaplaning Facial",                          cat:"Facials",                price:850},
+  {name:"Luxurious Facial",                             cat:"Facials",                price:1100},
+  {name:"Standard Manicure",                            cat:"Manicure",               price:250},
+  {name:"Gel Paint Manicure",                           cat:"Manicure",               price:285},
+  {name:"Rubber Gel Paint Manicure",                    cat:"Manicure",               price:305},
+  {name:"Manicure with Stickons",                       cat:"Manicure",               price:385},
+  {name:"Manicure with Extensions / Polygel",           cat:"Manicure",               price:450},
+];
+
+const SEED_THERAPISTS = [
+  {id:1,name:"Aisha Nkonde",    role:"Senior Massage Therapist",initials:"AN",color:"#c9a96e",specialties:"Massage, Body Treatments",    phone:"+260 97 111 2233",email:"aisha@ngalulaspa.com",   bio:"5+ years in therapeutic massage.",  sessions:142,rating:4.9,revenue:68400,active:true},
+  {id:2,name:"Priscilla Chanda",role:"Beauty Therapist",        initials:"PC",color:"#d4a8ff",specialties:"Manicure, Pedicures",          phone:"+260 96 222 3344",email:"priscilla@ngalulaspa.com",bio:"Nail artistry & gel manicure expert.",sessions:98, rating:4.8,revenue:42100,active:true},
+  {id:3,name:"Grace Mulenga",   role:"Skin & Facial Specialist",initials:"GM",color:"#5cdb95",specialties:"Facials, Aromatherapy",        phone:"+260 95 333 4455",email:"grace@ngalulaspa.com",    bio:"Certified dermaplaning specialist.", sessions:76, rating:4.9,revenue:38600,active:true},
+];
+
+const SEED_BOOKINGS = [
+  {id:101,ref:"NGS-SEED01",client:"Thandiwe Mwanza",  phone:"+260 97 123 4567",email:"t@mail.com", service:"Ngalula Signature Massage",   cat:"Massage",                therapist:"Aisha Nkonde",    date:"2026-05-17",time:"09:00",amount:800, status:"confirmed",  payment:"paid",  note:"Regular client.",source:"existing"},
+  {id:102,ref:"NGS-SEED02",client:"Chisomo Banda",    phone:"+260 96 234 5678",email:"",           service:"Swedish Massage",             cat:"Massage",                therapist:"Priscilla Chanda",date:"2026-05-17",time:"10:30",amount:550, status:"confirmed",  payment:"unpaid",note:"",source:"existing"},
+  {id:103,ref:"NGS-SEED03",client:"Mutale Kabwe",     phone:"+260 95 345 6789",email:"m@mail.com", service:"Deep Cleanse Facial",         cat:"Facials",                therapist:"Grace Mulenga",   date:"2026-05-17",time:"11:00",amount:612, status:"in_progress",payment:"paid",  note:"",source:"existing"},
+  {id:104,ref:"NGS-SEED04",client:"Natasha Phiri",    phone:"+260 97 456 7890",email:"n@mail.com", service:"Couples' Massage",            cat:"Massage",                therapist:"Aisha Nkonde",    date:"2026-05-17",time:"13:00",amount:1500,status:"pending",    payment:"unpaid",note:"Anniversary â€” rose petals.",source:"existing"},
+  {id:105,ref:"NGS-SEED05",client:"Yvonne Musonda",   phone:"+260 96 890 1234",email:"y@mail.com", service:"Luxurious Facial",            cat:"Facials",                therapist:"Grace Mulenga",   date:"2026-05-16",time:"09:00",amount:1100,status:"completed",  payment:"paid",  note:"",source:"existing"},
+  {id:106,ref:"NGS-SEED06",client:"Susan Lungu",      phone:"+260 97 012 3456",email:"s@mail.com", service:"Ngalula New Mommy Massage",   cat:"Massage",                therapist:"Aisha Nkonde",    date:"2026-05-16",time:"14:00",amount:1250,status:"completed",  payment:"paid",  note:"6 weeks postpartum.",source:"existing"},
+  {id:107,ref:"NGS-SEED07",client:"Emmanuel Zulu",    phone:"+260 95 678 9012",email:"e@mail.com", service:"Men's Premium Pedicure",      cat:"Pedicures & Body Scrubs",therapist:"Grace Mulenga",   date:"2026-05-18",time:"09:30",amount:525, status:"confirmed",  payment:"paid",  note:"",source:"existing"},
+  {id:108,ref:"NGS-SEED08",client:"Lweendo Mwape",    phone:"+260 95 222 3333",email:"",           service:"Dermaplaning Facial",         cat:"Facials",                therapist:"Grace Mulenga",   date:"2026-05-18",time:"11:00",amount:850, status:"pending",    payment:"unpaid",note:"",source:"existing"},
+];
+
+const REVENUE_DATA = [
+  {day:"May 4",rev:1850},{day:"May 5",rev:2400},{day:"May 6",rev:1200},{day:"May 7",rev:3100},
+  {day:"May 8",rev:2750},{day:"May 9",rev:950}, {day:"May 10",rev:1650},{day:"May 11",rev:2800},
+  {day:"May 12",rev:3400},{day:"May 13",rev:1900},{day:"May 14",rev:2200},{day:"May 15",rev:3800},
+  {day:"May 16",rev:3500},{day:"May 17",rev:2787},
+];
+
+const TIME_SLOTS = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30"];
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DAYS   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const CAT_META = {"All":{icon:"🌸",col:"#c9a96e",bg:"rgba(201,169,110,0.1)"},"Massage":{icon:"💇‍♀️",col:"#c9a96e",bg:"rgba(201,169,110,0.1)"},"Pedicures & Body Scrubs":{icon:"🧿",col:"#5cdb95",bg:"rgba(92,219,149,0.1)"},"Facials":{icon:"✨",col:"#d4a8ff",bg:"rgba(212,168,255,0.1)"},"Manicure":{icon:"💅",col:"#ff9eb5",bg:"rgba(255,158,181,0.1)"}};
+const STATUS_META = {pending:{l:"Pending",c:"#ffb347",bg:"rgba(255,179,71,0.12)"},confirmed:{l:"Confirmed",c:"#5cdb95",bg:"rgba(92,219,149,0.12)"},in_progress:{l:"In Progress",c:"#8b9ef7",bg:"rgba(139,158,247,0.12)"},completed:{l:"Completed",c:"#c9a96e",bg:"rgba(201,169,110,0.12)"},cancelled:{l:"Cancelled",c:"#ff4d6d",bg:"rgba(255,77,109,0.12)"}};
+const PAY_META   = {unpaid:{l:"Unpaid",c:"#ff4d6d"},paid:{l:"Paid ✓",c:"#5cdb95"},partial:{l:"Partial",c:"#ffb347"}};
+const COLORS_PRESET = ["#c9a96e","#d4a8ff","#5cdb95","#ff9eb5","#8b9ef7","#ffb347","#5bc8f5","#f97d6e"];
+const AIRTEL_NUMBER = "0971 234 567";
+
+const genRef = () => "NGS-" + Math.random().toString(36).slice(2,8).toUpperCase();
+const genId  = () => Date.now() + Math.floor(Math.random()*9999);
+const fmtDate = d => `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
+const getDates = () => { const out=[]; const d=new Date(); d.setDate(d.getDate()+1); while(out.length<21){if(d.getDay()!==0)out.push(new Date(d));d.setDate(d.getDate()+1);} return out; };
+
+// TINY COMPONENTS
+const SBadge = ({s}) => { const m=STATUS_META[s]||STATUS_META.pending; return <span style={{padding:"0.17rem 0.55rem",borderRadius:"20px",fontSize:"0.64rem",fontWeight:600,background:m.bg,color:m.c,whiteSpace:"nowrap"}}>{m.l}</span>; };
+const PBadge = ({s}) => { const m=PAY_META[s]||PAY_META.unpaid; return <span style={{fontSize:"0.7rem",color:m.c,fontWeight:600}}>{m.l}</span>; };
+
+const SI = {width:"100%",background:"#0d0c13",border:"1px solid #2a2633",borderRadius:"8px",padding:"0.58rem 0.85rem",color:"#e8d5b7",fontSize:"0.83rem",outline:"none",boxSizing:"border-box",fontFamily:"'DM Sans',sans-serif"};
+const PrimaryBtn = ({children,onClick,disabled,style={}}) => <button onClick={onClick} disabled={disabled} style={{padding:"0.7rem 1.5rem",borderRadius:"9px",border:"none",cursor:disabled?"not-allowed":"pointer",fontWeight:700,fontSize:"0.83rem",fontFamily:"'DM Sans',sans-serif",background:"linear-gradient(135deg,#c9a96e,#e8c98a)",color:"#0d0b10",opacity:disabled?0.35:1,transition:"opacity 0.2s",...style}}>{children}</button>;
+const GhostBtn  = ({children,onClick,style={}}) => <button onClick={onClick} style={{padding:"0.65rem 1.2rem",borderRadius:"9px",cursor:"pointer",fontWeight:500,fontSize:"0.82rem",fontFamily:"'DM Sans',sans-serif",background:"transparent",color:"#6e6460",border:"1px solid #2a2633",...style}}>{children}</button>;
+const DangerBtn = ({children,onClick}) => <button onClick={onClick} style={{padding:"0.65rem 1.2rem",borderRadius:"9px",cursor:"pointer",fontWeight:700,fontSize:"0.82rem",fontFamily:"'DM Sans',sans-serif",background:"rgba(255,77,109,0.1)",color:"#ff4d6d",border:"1px solid rgba(255,77,109,0.3)"}}>{ children}</button>;
+
+function FField({label,error,children}){return(<div style={{marginBottom:"0.82rem"}}><label style={{display:"block",fontSize:"0.63rem",color:"#8a7f70",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:"0.3rem"}}>{label}</label>{children}{error&&<div style={{fontSize:"0.63rem",color:"#ff4d6d",marginTop:"0.2rem"}}>✖  {error}</div>}</div>);}
+
+function BaseModal({title,subtitle,onClose,children,wide=false}){return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",backdropFilter:"blur(6px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,padding:"1rem"}}><div style={{background:"#13111a",border:"1px solid #2a2633",borderRadius:"16px",padding:"1.8rem",width:"100%",maxWidth:wide?"700px":"460px",maxHeight:"92vh",overflowY:"auto",boxShadow:"0 30px 80px rgba(0,0,0,0.7)"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"1.4rem"}}><div><h3 style={{margin:0,fontFamily:"'Cormorant Garamond',serif",fontSize:"1.2rem",color:"#e8d5b7"}}>{title}</h3>{subtitle&&<p style={{margin:"0.2rem 0 0",fontSize:"0.7rem",color:"#5a5060"}}>{subtitle}</p>}</div><button onClick={onClose} style={{background:"none",border:"none",color:"#5a5060",fontSize:"1.5rem",cursor:"pointer",lineHeight:1,flexShrink:0}}>×</button></div>{children}</div></div>);}
+
+function DeleteConfirm({what,name,onConfirm,onClose}){return(<BaseModal title="Confirm Deletion" onClose={onClose}><div style={{textAlign:"center",padding:"0.5rem 0 1.5rem"}}><div style={{fontSize:"2.5rem",marginBottom:"0.8rem"}}>🗑️</div><p style={{color:"#a89f8c",fontSize:"0.85rem",lineHeight:1.6,margin:"0 0 0.4rem"}}>Permanently delete this {what}:</p><p style={{color:"#e8d5b7",fontWeight:600,fontSize:"0.9rem",margin:"0 0 1rem"}}>{name}</p><p style={{color:"#ff4d6d",fontSize:"0.72rem",margin:0}}>This cannot be undone.</p></div><div style={{display:"flex",gap:"0.8rem"}}><GhostBtn onClick={onClose} style={{flex:1}}>Cancel</GhostBtn><DangerBtn onClick={onConfirm}>Delete</DangerBtn></div></BaseModal>);} 
+
+// ... (Due to length, the rest of the JSX app code continues unchanged)
+
+    // Provide lightweight fallbacks for Recharts components (CDN blocked in some environments)
+    const ResponsiveContainer = ({width='100%',height=140,children})=> React.createElement('div',{style:{width,height,overflow:'hidden'}},children);
+    const BarChart = ({data, children})=>{
+      const vals = (data||[]).map(d=>d.rev||0);
+      const max = Math.max(...vals,1);
+      const w = Math.max(300, (data||[]).length*36);
+      return React.createElement('div',{style:{width:'100%',height:140,overflow:'auto'}},
+        React.createElement('svg',{width:w,height:140,viewBox:`0 0 ${w} 140`,preserveAspectRatio:'none'},
+          (data||[]).map((d,i)=>React.createElement('rect',{key:i,x: i*36+8, y: 12 + Math.round((1-(d.rev/max))*116), width:20, height: Math.round((d.rev/max)*116), fill: i===data.length-1 ? '#c9a96e':'#2a2835'}))
+        )
+      );
+    };
+    const Bar = ()=>null;
+    const CartesianGrid = ()=>null;
+    const XAxis = ()=>null;
+    const YAxis = ()=>null;
+    const Tooltip = ()=>null;
+    const Cell = ()=>null;
+
+    // For brevity in this preview file, load the full JSX component from the served .jsx file via fetch and evaluate it.
+(async function bootstrap(){
+  try{
+    const res = await fetch('ngalula-unified.jsx');
+    const txt = await res.text();
+    // Remove import/export lines and replace with local React/Recharts bindings
+    let mod = txt.replace(/import[\s\S]*?from\s+"react";?/g, '')
+             .replace(/import[\s\S]*?from\s+"recharts";?/g, '')
+             .replace(/export default /g, 'function ');
+    // Transpile JSX with Babel then evaluate the module source
+    try{
+      // fix artifacts from replacing `export default` earlier
+      mod = mod.replace(/function function/g,'function');
+      const transformed = Babel.transform(mod, { presets: ['react'] }).code;
+      // eslint-disable-next-line no-eval
+      eval(transformed + "\n;ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(NgalulaUnifiedApp));");
+    }catch(e){
+      throw e;
+    }
+  }catch(e){
+    document.getElementById('root').innerText = 'Failed to load app: ' + e.message;
+    console.error(e);
+  }
+})();
+
+  </script>
+</body>
+</html>
