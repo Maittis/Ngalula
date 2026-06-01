@@ -36,9 +36,9 @@ const SERVICES_LIST = [
 ];
 
 const SEED_THERAPISTS = [
-  {id:1,name:"Aisha Nkonde",    role:"Senior Massage Therapist",initials:"AN",color:"#c9a96e",specialties:"Massage, Body Treatments",    phone:"+260 97 111 2233",email:"aisha@ngalulaspa.com",   bio:"5+ years in therapeutic massage.",  sessions:142,rating:4.9,revenue:68400,active:true},
-  {id:2,name:"Priscilla Chanda",role:"Beauty Therapist",        initials:"PC",color:"#d4a8ff",specialties:"Manicure, Pedicures",          phone:"+260 96 222 3344",email:"priscilla@ngalulaspa.com",bio:"Nail artistry & gel manicure expert.",sessions:98, rating:4.8,revenue:42100,active:true},
-  {id:3,name:"Grace Mulenga",   role:"Skin & Facial Specialist",initials:"GM",color:"#5cdb95",specialties:"Facials, Aromatherapy",        phone:"+260 95 333 4455",email:"grace@ngalulaspa.com",    bio:"Certified dermaplaning specialist.", sessions:76, rating:4.9,revenue:38600,active:true},
+  {id:1,name:"Maria",    role:"Senior Massage Therapist",initials:"AN",color:"#c9a96e",specialties:"Massage, Body Treatments",    phone:"+260 97 111 2233",email:"aisha@ngalulaspa.com",   bio:"5+ years in therapeutic massage.",  sessions:142,rating:4.9,revenue:68400,active:true},
+  {id:2,name:"Abigail",role:"Beauty Therapist",        initials:"PC",color:"#d4a8ff",specialties:"Manicure, Pedicures",          phone:"+260 96 222 3344",email:"priscilla@ngalulaspa.com",bio:"Nail artistry & gel manicure expert.",sessions:98, rating:4.8,revenue:42100,active:true},
+  {id:3,name:"Grace",   role:"Skin & Facial Specialist",initials:"GM",color:"#5cdb95",specialties:"Facials, Aromatherapy",        phone:"+260 95 333 4455",email:"grace@ngalulaspa.com",    bio:"Certified dermaplaning specialist.", sessions:76, rating:4.9,revenue:38600,active:true},
 ];
 
 const SEED_BOOKINGS = [
