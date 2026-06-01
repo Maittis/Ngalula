@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 
 // ─── SHARED SEED DATA ─────────────────────────────────────────────────────
 const SERVICES_LIST = [
-  {name:"Swedish Massage",                              cat:"Massage",                price:550},
+  {name:"Swedishes Massage",                              cat:"Massage",                price:550},
   {name:"Aromatherapy Massage",                         cat:"Massage",                price:650},
   {name:"Pregnancy Massage",                            cat:"Massage",                price:800},
   {name:"Ngalula Signature Massage",                    cat:"Massage",                price:800},
