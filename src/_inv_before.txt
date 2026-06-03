@@ -1,0 +1,55 @@
+function AdminInventory({products,setProducts,currentAdmin}){
+  const [search,setSearch]=useState("");
+  const [showForm,setShowForm]=useState(false);
+  const [editing,setEditing]=useState(null);
+  const [deleting,setDeleting]=useState(null);
+  const filtered=products.filter(p=>p.name.toLowerCase().includes(search.toLowerCase())||p.cat.toLowerCase().includes(search.toLowerCase()));
+  const save=(fd)=>{const bd=currentAdmin?.role!=="superadmin"?{...fd,branch:currentAdmin.branch}:fd;if(editing)setProducts(pp=>pp.map(p=>p.id===editing.id?{...p,...bd}:p));else setProducts(pp=>[...pp,{...bd,id:Date.now()}]);setShowForm(false);setEditing(null);};
+  const del=(id)=>{setProducts(pp=>pp.filter(p=>p.id!==id));setDeleting(null);};
+  return(
+    <div style={{padding:"1.3rem",overflowY:"auto",height:"100%"}}>
+      <div style={{display:"flex",gap:"0.6rem",flexWrap:"wrap",alignItems:"center",marginBottom:"0.9rem"}}>
+        <input placeholder="Search products…" value={search} onChange={e=>setSearch(e.target.value)} style={{flex:"1 1 200px",background:"#0d0c13",border:"1px solid #1e1c26",borderRadius:"8px",padding:"0.48rem 0.75rem",color:"#e8d5b7",fontSize:"0.77rem",outline:"none",fontFamily:"'DM Sans',sans-serif"}}/>
+        <span style={{fontSize:"0.68rem",color:"#2a2633"}}>{filtered.length} products</span>
+        <PrimaryBtn onClick={()=>{setEditing(null);setShowForm(true);}} style={{marginLeft:"auto",whiteSpace:"nowrap",padding:"0.5rem 1.1rem"}}>+ Add Product</PrimaryBtn>
+      </div>
+      <div style={{background:"#0f0d14",border:"1px solid #1e1c26",borderRadius:"14px",overflow:"hidden"}}>
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:"0.74rem"}}>
+            <thead><tr style={{background:"rgba(255,255,255,0.02)"}}>
+              {["Product","Category","Price","Stock","Value",""].map(h=><th key={h} style={{padding:"0.6rem 0.7rem",textAlign:"left",color:"#3a3650",fontWeight:500,fontSize:"0.6rem",textTransform:"uppercase",letterSpacing:"0.08em",whiteSpace:"nowrap",borderBottom:"1px solid #16141f"}}>{h}</th>)}
+            </tr></thead>
+            <tbody>
+              {filtered.length===0?<tr><td colSpan={6} style={{textAlign:"center",padding:"3rem",color:"#2a2633"}}>No products match</td></tr>:filtered.map(p=>(
+                <tr key={p.id}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(201,169,110,0.03)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+                >
+                  <td style={{padding:"0.5rem 0.7rem",borderBottom:"1px solid #111019",color:"#c8c0b0",fontWeight:500}}>{p.name}</td>
+                  <td style={{padding:"0.5rem 0.7rem",borderBottom:"1px solid #111019",color:"#4a4560",fontSize:"0.68rem"}}>{p.cat}</td>
+                  <td style={{padding:"0.5rem 0.7rem",borderBottom:"1px solid #111019",color:"#c9a96e",fontWeight:600}}>K{p.price.toLocaleString()}</td>
+                  <td style={{padding:"0.5rem 0.7rem",borderBottom:"1px solid #111019"}}><span style={{color:p.stock<15?"#ef4444":"#5cdb95",fontWeight:600}}>{p.stock}</span>{p.stock<15&&<span style={{fontSize:"0.58rem",color:"#ef4444",marginLeft:"0.3rem"}}>low</span>}</td>
+                  <td style={{padding:"0.5rem 0.7rem",borderBottom:"1px solid #111019",color:"#8b9ef7",fontWeight:600}}>K{(p.price*p.stock).toLocaleString()}</td>
+                  <td style={{padding:"0.5rem 0.7rem",borderBottom:"1px solid #111019",textAlign:"right",whiteSpace:"nowrap"}}>
+                    <button onClick={()=>{setEditing(p);setShowForm(true);}} style={{padding:"0.2rem 0.5rem",borderRadius:"6px",border:"1px solid #1e1c26",background:"transparent",color:"#8b9ef7",cursor:"pointer",fontSize:"0.65rem",marginRight:"0.3rem"}}>Edit</button>
+                    <button onClick={()=>setDeleting(p)} style={{padding:"0.2rem 0.5rem",borderRadius:"6px",border:"1px solid #ff4d6d33",background:"transparent",color:"#ff4d6d",cursor:"pointer",fontSize:"0.65rem"}}>×</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div style={{padding:"0.5rem 0.8rem",borderTop:"1px solid #16141f",fontSize:"0.64rem",color:"#2a2633",display:"flex",justifyContent:"space-between"}}>
+          <span>{filtered.length} of {products.length} products</span>
+          <span>Total stock value: K{products.reduce((s,p)=>s+p.price*p.stock,0).toLocaleString()}</span>
+        </div>
+      </div>
+      {showForm&&(
+        <BaseModal title={editing?`Edit — ${editing.name}`:"New Product"} subtitle="Add or update inventory item" onClose={()=>{setShowForm(false);setEditing(null);}}>
+          <ProductForm initial={editing} onSave={save} onClose={()=>{setShowForm(false);setEditing(null);}}/>
+        </BaseModal>
+      )}
+      {deleting&&<DeleteConfirm what="product" name={deleting.name} onConfirm={()=>del(deleting.id)} onClose={()=>setDeleting(null)}/>}
+    </div>
+  );
+}

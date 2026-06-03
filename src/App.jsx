@@ -1194,7 +1194,7 @@ function AdminRevenue({bookings}){
           <div style={{fontSize:"0.64rem",color:"#4a4560"}}>Projected 7-day: <span style={{color:"#c9a96e",fontWeight:600}}>K{predictions.reduce((s,p)=>s+p.pred,0).toLocaleString()}</span></div>
         </div>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"1rem"}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:"1rem"}}>
         <div style={{background:"#0f0d14",border:"1px solid #1e1c26",borderRadius:"14px",padding:"1.1rem"}}>
           <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"0.95rem",color:"#e8d5b7",marginBottom:"0.9rem"}}>By Category</div>
           {cats.map(c=><div key={c.n} style={{marginBottom:"0.8rem"}}><div style={{display:"flex",justifyContent:"space-between",fontSize:"0.72rem",marginBottom:"0.22rem"}}><span style={{color:"#5a5060"}}>{c.n}</span><span style={{color:c.c,fontWeight:600}}>K{c.rev.toLocaleString()}</span></div><div style={{background:"#0d0c13",borderRadius:"4px",height:"6px"}}><div style={{width:`${Math.round((c.rev/maxCat)*100)}%`,height:"100%",background:`linear-gradient(90deg,${c.c}77,${c.c})`,borderRadius:"4px"}}/></div></div>)}
@@ -1204,7 +1204,7 @@ function AdminRevenue({bookings}){
           {(()=>{const paid=bookings.filter(b=>b.payment==="paid").reduce((s,b)=>s+bkTotal(b),0);const unpaid=bookings.filter(b=>b.payment==="unpaid"&&b.status!=="cancelled").reduce((s,b)=>s+bkTotal(b),0);return[{l:"Collected",v:paid,c:"#5cdb95"},{l:"Outstanding",v:unpaid,c:"#ef4444"}].map(r=><div key={r.l} style={{marginBottom:"0.85rem"}}><div style={{display:"flex",justifyContent:"space-between",fontSize:"0.72rem",marginBottom:"0.22rem"}}><span style={{color:"#5a5060"}}>{r.l}</span><span style={{color:r.c,fontWeight:600}}>K{r.v.toLocaleString()}</span></div><div style={{background:"#0d0c13",borderRadius:"4px",height:"6px"}}><div style={{width:`${Math.round((r.v/(paid+unpaid||1))*100)}%`,height:"100%",background:`linear-gradient(90deg,${r.c}77,${r.c})`,borderRadius:"4px"}}/></div></div>);})()}
         </div>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"1rem"}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:"1rem"}}>
         {catPieData.length>0&&(
           <div style={{background:"#0f0d14",border:"1px solid #1e1c26",borderRadius:"14px",padding:"1rem"}}>
             <div style={{fontSize:"0.6rem",color:"#3a3650",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:"0.5rem"}}>Revenue by Category</div>
