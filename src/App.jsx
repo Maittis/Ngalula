@@ -219,6 +219,7 @@ function ModeSwitcher({mode,setMode,newCount,pulseAdmin}){
         );
       })}
       <style>{`@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}} @keyframes spin{to{transform:rotate(360deg)}} @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}} @keyframes slideIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}} @keyframes pulseRing{0%,100%{opacity:0.4;transform:translate(-50%,-50%) scale(1)}50%{opacity:0.8;transform:translate(-50%,-50%) scale(1.04)}} @keyframes floatOrb{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}} @keyframes particleRise{0%{transform:translateY(0) rotate(0deg);opacity:0}10%{opacity:0.25}90%{opacity:0.25}100%{transform:translateY(-105vh) rotate(720deg);opacity:0}} @keyframes phraseSwap{0%{opacity:0;filter:blur(8px);transform:translateY(12px)}100%{opacity:1;filter:blur(0);transform:translateY(0)}} @keyframes charIn{0%{opacity:0;transform:translateY(10px) scale(0.95)}100%{opacity:1;transform:translateY(0) scale(1)}} @keyframes slideDown{0%{opacity:0;transform:translateY(-14px)}100%{opacity:1;transform:translateY(0)}} @keyframes pulseWidth{0%,100%{width:36px;opacity:1}50%{width:48px;opacity:0.5}} @keyframes glowPulse{0%,100%{box-shadow:0 10px 40px rgba(201,169,110,0.2),0 0 80px rgba(139,158,247,0.05)}50%{box-shadow:0 10px 60px rgba(201,169,110,0.35),0 0 100px rgba(139,158,247,0.15)}`}</style>
+      <style>{`@media(max-width:768px){.mob-hide{display:none!important}.mob-full{max-width:100%!important}}@media(max-width:600px){.mob-show{display:flex!important}.admin-sidebar{position:fixed!important;left:0;top:0;bottom:0;z-index:200;transform:translateX(0);transition:transform 0.25s ease;width:206px}.admin-sidebar.closed{transform:translateX(-100%)}.admin-overlay{display:block!important}.admin-table{font-size:0.68rem!important}.admin-table thead{display:none!important}.admin-table tr{display:flex!important;flex-direction:column!important;padding:0.5rem 0.6rem!important;border-bottom:1px solid #16141f!important}.admin-table td{display:flex!important;justify-content:space-between!important;align-items:center!important;padding:0.2rem 0!important;border:none!important;gap:0.5rem!important}.admin-table td:before{content:attr(data-label);font-size:0.55rem!important;color:#3a3650!important;text-transform:uppercase!important;letter-spacing:0.07em!important;white-space:nowrap!important;flex-shrink:0!important}}@media(max-width:480px){.mob-btn{padding:0.35rem 0.6rem!important;font-size:0.7rem!important}}`}</style>
     </div>
   );
 }
@@ -231,7 +232,7 @@ function ProgressBar({step}){
   const steps=["Services","Date & Time","Therapist","Review","Account"];
   return(
     <div style={{background:"#0d0b12",borderBottom:"1px solid #16141f",padding:"0.85rem 1.5rem",overflowX:"auto"}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"center",minWidth:"340px"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"center",minWidth:"260px"}}>
         {steps.map((s,i)=>{
           const n=i+1,done=step>n,active=step===n;
           return(
@@ -706,9 +707,10 @@ function ClientApp({bookings,therapists,services,onNewBooking,onSwitchAdmin,hero
 
 const ADMIN_NAV=[{id:"dashboard",icon:"◈",label:"Dashboard"},{id:"bookings",icon:"📋",label:"Bookings"},{id:"extras",icon:"➕",label:"Extras"},{id:"invoices",icon:"🧾",label:"Invoices"},{id:"services",icon:"📦",label:"Services"},{id:"inventory",icon:"📦",label:"Inventory"},{id:"giftcards",icon:"🎁",label:"Gift Cards"},{id:"messaging",icon:"📬",label:"Messages"},{id:"reports",icon:"📈",label:"Reports"},{id:"appearance",icon:"🎨",label:"Appearance"},{id:"therapists",icon:"👥",label:"Therapists"},{id:"clients",icon:"🧑‍🤝‍🧑",label:"Clients"},{id:"revenue",icon:"📊",label:"Revenue"}];
 
-function Sidebar({view,setView,collapsed,setCollapsed,pending,isSuper,currentAdmin,onLogout}){
-  return(
-    <div style={{width:collapsed?"54px":"206px",background:"#0b0a10",borderRight:"1px solid #16141f",display:"flex",flexDirection:"column",transition:"width 0.22s ease",flexShrink:0,zIndex:10}}>
+function Sidebar({view,setView,collapsed,setCollapsed,pending,isSuper,currentAdmin,onLogout,mobileOpen,onCloseMobile}){
+  const navItemClick=(id)=>{setView(id);if(onCloseMobile)onCloseMobile();};
+  const sidebarInner=(
+    <div style={{width:collapsed?"54px":"206px",background:"#0b0a10",borderRight:"1px solid #16141f",display:"flex",flexDirection:"column",transition:"width 0.22s ease",flexShrink:0,zIndex:10,height:"100%"}}>
       <div style={{padding:collapsed?"1rem 0":"1.1rem",borderBottom:"1px solid #16141f",display:"flex",alignItems:"center",gap:"0.6rem",overflow:"hidden"}}>
         <span style={{fontSize:"1.2rem",flexShrink:0,display:"block",textAlign:"center",width:collapsed?"100%":"auto"}}>🌸</span>
         {!collapsed&&<div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"0.95rem",color:"#e8d5b7",fontWeight:600,whiteSpace:"nowrap",letterSpacing:"0.02em"}}>Ngalula Spa</div><div style={{fontSize:"0.54rem",color:"#3a3650",letterSpacing:"0.14em",textTransform:"uppercase"}}>Admin Panel</div></div>}
@@ -717,7 +719,7 @@ function Sidebar({view,setView,collapsed,setCollapsed,pending,isSuper,currentAdm
         {(isSuper ? ADMIN_NAV : ADMIN_NAV.filter(i=>i.id!=="appearance"&&i.id!=="reports")).map(item=>{
           const act=view===item.id;
           return(
-            <div key={item.id} onClick={()=>setView(item.id)} style={{display:"flex",alignItems:"center",gap:"0.65rem",padding:collapsed?"0.65rem 0":"0.55rem 0.9rem",cursor:"pointer",background:act?"rgba(201,169,110,0.08)":"transparent",borderRight:`2px solid ${act?"#c9a96e":"transparent"}`,justifyContent:collapsed?"center":"flex-start",position:"relative",transition:"all 0.15s"}}
+            <div key={item.id} onClick={()=>navItemClick(item.id)} style={{display:"flex",alignItems:"center",gap:"0.65rem",padding:collapsed?"0.65rem 0":"0.55rem 0.9rem",cursor:"pointer",background:act?"rgba(201,169,110,0.08)":"transparent",borderRight:`2px solid ${act?"#c9a96e":"transparent"}`,justifyContent:collapsed?"center":"flex-start",position:"relative",transition:"all 0.15s"}}
               onMouseEnter={e=>{if(!act)e.currentTarget.style.background="rgba(255,255,255,0.02)"}}
               onMouseLeave={e=>{if(!act)e.currentTarget.style.background="transparent"}}
             >
@@ -738,13 +740,20 @@ function Sidebar({view,setView,collapsed,setCollapsed,pending,isSuper,currentAdm
       </div>
     </div>
   );
+  return(<>
+    {mobileOpen&&<div onClick={onCloseMobile} className="admin-overlay" style={{display:"none",position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:199,backdropFilter:"blur(4px)"}} />}
+    <div className={`admin-sidebar${mobileOpen?"":" closed"}`}>
+      {sidebarInner}
+    </div>
+  </>);
 }
 
-function AdminTopBar({view,unread,onBell,newBookingsCount,currentAdmin,onLogout}){
+function AdminTopBar({view,unread,onBell,newBookingsCount,currentAdmin,onLogout,onMenuToggle}){
   const T={dashboard:"Dashboard",bookings:"Bookings",extras:"Extras",invoices:"Invoices",services:"Services",inventory:"Inventory",giftcards:"Gift Cards",reports:"Reports",appearance:"Appearance",therapists:"Therapists",clients:"Clients",revenue:"Revenue & Analytics",messaging:"Communications"};
   return(
     <div style={{height:"50px",background:"#0b0a10",borderBottom:"1px solid #16141f",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 1.3rem",flexShrink:0}}>
       <div style={{display:"flex",alignItems:"center",gap:"0.8rem"}}>
+        <button onClick={onMenuToggle} className="mob-show" style={{display:"none",background:"none",border:"none",color:"#a89f8c",fontSize:"1.2rem",cursor:"pointer",padding:"0",fontFamily:"'DM Sans',sans-serif"}}>☰</button>
         <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.1rem",color:"#e8d5b7",fontWeight:500}}>{T[view]||view}</span>
         {newBookingsCount>0&&<span style={{padding:"0.15rem 0.6rem",borderRadius:"20px",background:"rgba(92,219,149,0.1)",color:"#5cdb95",fontSize:"0.65rem",fontWeight:600,animation:"pulse 2s ease infinite"}}>🔴 {newBookingsCount} new live booking{newBookingsCount>1?"s":""}</span>}
       </div>
@@ -758,7 +767,7 @@ function AdminTopBar({view,unread,onBell,newBookingsCount,currentAdmin,onLogout}
         </div>
         <div style={{display:"flex",alignItems:"center",gap:"0.45rem"}}>
           <div style={{width:"28px",height:"28px",borderRadius:"50%",background:currentAdmin?.role==="superadmin"?"rgba(201,169,110,0.15)":"rgba(92,219,149,0.1)",border:"1px solid",borderColor:currentAdmin?.role==="superadmin"?"#c9a96e44":"#5cdb9544",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.6rem",color:currentAdmin?.role==="superadmin"?"#c9a96e":"#5cdb95",fontWeight:700}}>{currentAdmin?.id==="superadmin"?"★":currentAdmin?.branch==="woodlands"?"🌳":"🌴"}</div>
-          <div><div style={{fontSize:"0.72rem",color:"#a89f8c",lineHeight:1.2}}>{currentAdmin?.name?.split("–")[0]?.trim()||"Admin"}</div>{currentAdmin?.branch!=="*"&&<div style={{fontSize:"0.55rem",color:"#3a3650",textTransform:"uppercase",letterSpacing:"0.07em"}}>{BRANCHES[currentAdmin?.branch]||""}</div>}</div>
+          <div className="mob-hide"><div style={{fontSize:"0.72rem",color:"#a89f8c",lineHeight:1.2}}>{currentAdmin?.name?.split("–")[0]?.trim()||"Admin"}</div>{currentAdmin?.branch!=="*"&&<div style={{fontSize:"0.55rem",color:"#3a3650",textTransform:"uppercase",letterSpacing:"0.07em"}}>{BRANCHES[currentAdmin?.branch]||""}</div>}</div>
         </div>
       </div>
     </div>
@@ -961,7 +970,7 @@ function AdminBookings({bookings,setBookings,therapists,services,currentAdmin}){
       </div>
       <div style={{background:"#0f0d14",border:"1px solid #1e1c26",borderRadius:"14px",overflow:"hidden"}}>
         <div style={{overflowX:"auto"}}>
-          <table style={{width:"100%",borderCollapse:"collapse",fontSize:"0.77rem"}}>
+          <table className="admin-table" style={{width:"100%",borderCollapse:"collapse",fontSize:"0.77rem"}}>
             <thead><tr style={{borderBottom:"1px solid #16141f",background:"rgba(255,255,255,0.02)"}}>{["Src","Ref","Client","Service","Therapist","Date/Time","Amount","Status","Payment","Method","Actions"].map(h=><th key={h} style={{padding:"0.62rem 0.8rem",textAlign:"left",color:"#3a3650",fontWeight:500,fontSize:"0.6rem",textTransform:"uppercase",letterSpacing:"0.1em",whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
             <tbody>
               {filtered.length===0?<tr><td colSpan={11} style={{textAlign:"center",padding:"3rem",color:"#2a2633"}}>No bookings match</td></tr>:filtered.map((b,i)=>(
@@ -969,23 +978,23 @@ function AdminBookings({bookings,setBookings,therapists,services,currentAdmin}){
                   onMouseEnter={e=>e.currentTarget.style.background="rgba(201,169,110,0.04)"}
                   onMouseLeave={e=>e.currentTarget.style.background=b.source==="client"?"rgba(92,219,149,0.02)":"transparent"}
                 >
-                  <td style={{padding:"0.55rem 0.8rem"}}><span title={b.source==="client"?"Live from app":"Admin entry"} style={{fontSize:"0.7rem"}}>{b.source==="client"?"🔵":"⚙️"}</span></td>
-                  <td style={{padding:"0.55rem 0.8rem",color:"#c9a96e",fontFamily:"monospace",fontSize:"0.66rem"}}>{b.ref}</td>
-                  <td style={{padding:"0.55rem 0.8rem"}}><div style={{fontWeight:500,color:"#c8c0b0",whiteSpace:"nowrap",fontSize:"0.78rem"}}>{b.client}</div><div style={{fontSize:"0.6rem",color:"#2a2633"}}>{b.phone}</div></td>
-                  <td style={{padding:"0.55rem 0.8rem",color:"#5a5060",maxWidth:"130px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontSize:"0.73rem"}}>{b.service}</td>
-                  <td style={{padding:"0.55rem 0.8rem",color:"#4a4560",fontSize:"0.7rem",whiteSpace:"nowrap"}}>{b.therapist?.split(" ")[0]}</td>
-                  <td style={{padding:"0.55rem 0.8rem",whiteSpace:"nowrap"}}><div style={{color:"#6e6460",fontSize:"0.7rem"}}>{b.date}</div><div style={{color:"#c9a96e",fontWeight:600,fontSize:"0.73rem"}}>{b.time}</div></td>
-                  <td style={{padding:"0.55rem 0.8rem",color:"#c9a96e",fontWeight:700,whiteSpace:"nowrap",fontSize:"0.78rem"}}>K{b.amount?.toLocaleString()}</td>
-                  <td style={{padding:"0.55rem 0.8rem"}}><SBadge s={b.status}/></td>
-                  <td style={{padding:"0.55rem 0.8rem"}}><PBadge s={b.payment}/></td>
-                  <td style={{padding:"0.55rem 0.8rem"}}><MethodBadge m={b.payMethod}/></td>
-                  <td style={{padding:"0.55rem 0.8rem"}}>
+                  <td data-label="Src" style={{padding:"0.55rem 0.8rem"}}><span title={b.source==="client"?"Live from app":"Admin entry"} style={{fontSize:"0.7rem"}}>{b.source==="client"?"🔵":"⚙️"}</span></td>
+                  <td data-label="Ref" style={{padding:"0.55rem 0.8rem",color:"#c9a96e",fontFamily:"monospace",fontSize:"0.66rem"}}>{b.ref}</td>
+                  <td data-label="Client" style={{padding:"0.55rem 0.8rem"}}><div style={{fontWeight:500,color:"#c8c0b0",whiteSpace:"nowrap",fontSize:"0.78rem"}}>{b.client}</div><div style={{fontSize:"0.6rem",color:"#2a2633"}}>{b.phone}</div></td>
+                  <td data-label="Service" style={{padding:"0.55rem 0.8rem",color:"#5a5060",maxWidth:"130px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontSize:"0.73rem"}}>{b.service}</td>
+                  <td data-label="Therapist" style={{padding:"0.55rem 0.8rem",color:"#4a4560",fontSize:"0.7rem",whiteSpace:"nowrap"}}>{b.therapist?.split(" ")[0]}</td>
+                  <td data-label="Date/Time" style={{padding:"0.55rem 0.8rem",whiteSpace:"nowrap"}}><div style={{color:"#6e6460",fontSize:"0.7rem"}}>{b.date}</div><div style={{color:"#c9a96e",fontWeight:600,fontSize:"0.73rem"}}>{b.time}</div></td>
+                  <td data-label="Amount" style={{padding:"0.55rem 0.8rem",color:"#c9a96e",fontWeight:700,whiteSpace:"nowrap",fontSize:"0.78rem"}}>K{b.amount?.toLocaleString()}</td>
+                  <td data-label="Status" style={{padding:"0.55rem 0.8rem"}}><SBadge s={b.status}/></td>
+                  <td data-label="Payment" style={{padding:"0.55rem 0.8rem"}}><PBadge s={b.payment}/></td>
+                  <td data-label="Method" style={{padding:"0.55rem 0.8rem"}}><MethodBadge m={b.payMethod}/></td>
+                  <td data-label="Actions" style={{padding:"0.55rem 0.8rem"}}>
                     <div style={{display:"flex",gap:"0.25rem",flexWrap:"wrap"}}>
-                      {b.status==="pending"&&<button onClick={()=>setBookings(bb=>bb.map(x=>x.id===b.id?{...x,status:"confirmed"}:x))} style={{padding:"0.14rem 0.38rem",borderRadius:"5px",border:"1px solid rgba(92,219,149,0.25)",background:"transparent",color:"#5cdb95",cursor:"pointer",fontSize:"0.58rem"}}>✓</button>}
-                      {b.payment==="unpaid"&&b.status!=="cancelled"&&<select onChange={e=>{const v=e.target.value;if(v)setBookings(bb=>bb.map(x=>x.id===b.id?{...x,payment:"paid",payMethod:v}:x));}} style={{padding:"0.1rem 0.2rem",borderRadius:"5px",border:"1px solid rgba(201,169,110,0.25)",background:"transparent",color:"#c9a96e",cursor:"pointer",fontSize:"0.55rem",maxWidth:"68px",outline:"none"}}><option value="">$ Pay</option>{Object.entries(PAY_METHOD_META).map(([k,v])=><option key={k} value={k}>{v.l}</option>)}</select>}
-                      {b.payMethod&&<select value="" onChange={e=>{const v=e.target.value;if(v)setBookings(bb=>bb.map(x=>x.id===b.id?{...x,payMethod:v}:x));}} style={{padding:"0.1rem 0.2rem",borderRadius:"5px",border:"1px solid #2a2633",background:"transparent",color:"#5a5060",cursor:"pointer",fontSize:"0.55rem",maxWidth:"68px",outline:"none"}}><option value="">{PAY_METHOD_META[b.payMethod]?.l||b.payMethod}</option>{Object.entries(PAY_METHOD_META).filter(([k])=>k!==b.payMethod).map(([k,v])=><option key={k} value={k}>{v.l}</option>)}</select>}
-                      <button onClick={()=>{setEditing(b);setShowForm(true);}} style={{padding:"0.14rem 0.38rem",borderRadius:"5px",border:"1px solid #1e1c26",background:"transparent",color:"#8b9ef7",cursor:"pointer",fontSize:"0.58rem"}}>✏</button>
-                      <button onClick={()=>setDeleting(b)} style={{padding:"0.14rem 0.38rem",borderRadius:"5px",border:"1px solid rgba(239,68,68,0.2)",background:"transparent",color:"#ef4444",cursor:"pointer",fontSize:"0.58rem"}}>🗑</button>
+                      {b.status==="pending"&&<button onClick={()=>setBookings(bb=>bb.map(x=>x.id===b.id?{...x,status:"confirmed"}:x))} className="mob-btn" style={{padding:"0.14rem 0.38rem",borderRadius:"5px",border:"1px solid rgba(92,219,149,0.25)",background:"transparent",color:"#5cdb95",cursor:"pointer",fontSize:"0.58rem"}}>✓</button>}
+                      {b.payment==="unpaid"&&b.status!=="cancelled"&&<select onChange={e=>{const v=e.target.value;if(v)setBookings(bb=>bb.map(x=>x.id===b.id?{...x,payment:"paid",payMethod:v}:x));}} className="mob-btn" style={{padding:"0.1rem 0.2rem",borderRadius:"5px",border:"1px solid rgba(201,169,110,0.25)",background:"transparent",color:"#c9a96e",cursor:"pointer",fontSize:"0.55rem",maxWidth:"68px",outline:"none"}}><option value="">$ Pay</option>{Object.entries(PAY_METHOD_META).map(([k,v])=><option key={k} value={k}>{v.l}</option>)}</select>}
+                      {b.payMethod&&<select value="" onChange={e=>{const v=e.target.value;if(v)setBookings(bb=>bb.map(x=>x.id===b.id?{...x,payMethod:v}:x));}} className="mob-btn" style={{padding:"0.1rem 0.2rem",borderRadius:"5px",border:"1px solid #2a2633",background:"transparent",color:"#5a5060",cursor:"pointer",fontSize:"0.55rem",maxWidth:"68px",outline:"none"}}><option value="">{PAY_METHOD_META[b.payMethod]?.l||b.payMethod}</option>{Object.entries(PAY_METHOD_META).filter(([k])=>k!==b.payMethod).map(([k,v])=><option key={k} value={k}>{v.l}</option>)}</select>}
+                      <button onClick={()=>{setEditing(b);setShowForm(true);}} className="mob-btn" style={{padding:"0.14rem 0.38rem",borderRadius:"5px",border:"1px solid #1e1c26",background:"transparent",color:"#8b9ef7",cursor:"pointer",fontSize:"0.58rem"}}>✏</button>
+                      <button onClick={()=>setDeleting(b)} className="mob-btn" style={{padding:"0.14rem 0.38rem",borderRadius:"5px",border:"1px solid rgba(239,68,68,0.2)",background:"transparent",color:"#ef4444",cursor:"pointer",fontSize:"0.58rem"}}>🗑</button>
                     </div>
                   </td>
                 </tr>
@@ -1648,7 +1657,7 @@ function InvoiceDetailModal({invoice,onClose,bookings}){
 
 function NotifPanel({notifications,setNotifications,onClose}){
   return(
-    <div style={{position:"fixed",top:"100px",right:"12px",width:"300px",background:"#0f0d14",border:"1px solid #1e1c26",borderRadius:"16px",boxShadow:"0 24px 80px rgba(0,0,0,0.5)",zIndex:150,overflow:"hidden",animation:"slideIn 0.2s ease both"}}>
+    <div className="mob-full" style={{position:"fixed",top:"100px",right:"12px",width:"300px",maxWidth:"calc(100vw - 24px)",background:"#0f0d14",border:"1px solid #1e1c26",borderRadius:"16px",boxShadow:"0 24px 80px rgba(0,0,0,0.5)",zIndex:150,overflow:"hidden",animation:"slideIn 0.2s ease both"}}>
       <div style={{padding:"0.85rem 1.1rem",borderBottom:"1px solid #16141f",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <span style={{fontFamily:"'Cormorant Garamond',serif",color:"#e8d5b7",fontSize:"0.92rem",fontWeight:600}}>Notifications</span>
         <div style={{display:"flex",gap:"0.6rem",alignItems:"center"}}>
@@ -2196,6 +2205,7 @@ function AdminApp({
   const bFilter = (arr,field="branch") => isSuper ? arr : arr.filter(i=>i[field]===branch);
   const [view, setView] = useState("dashboard");
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
 
   // ✅ SAFE FALLBACKS (prevents crashes)
@@ -2229,6 +2239,8 @@ function AdminApp({
             isSuper={isSuper}
             currentAdmin={currentAdmin}
             onLogout={onLogout}
+            mobileOpen={mobileOpen}
+            onCloseMobile={()=>setMobileOpen(false)}
           />
 
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "visible" }}>
@@ -2239,6 +2251,7 @@ function AdminApp({
             newBookingsCount={newBookingsCount}
             currentAdmin={currentAdmin}
             onLogout={onLogout}
+            onMenuToggle={()=>setMobileOpen(s=>!s)}
           />
 
           <div style={{ flex: 1, overflowY: "auto" }}>
