@@ -1940,14 +1940,18 @@ function AdminGiftCards({giftCards,setGiftCards,currentAdmin}){
 // Appearance Manager
 function AdminAppearance({heroImageUrl,setHeroImageUrl}){
   const [urlInput,setUrlInput]=useState(heroImageUrl||"");
-  const [gallery,setGallery]=useState([
+  const seedGallery=[
     {id:1,url:"https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=1600&q=80",label:"Spa Candles"},
     {id:2,url:"https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=1600&q=80",label:"Massage Room"},
     {id:3,url:"https://images.unsplash.com/photo-1600334123748-f59f43e5c4f6?auto=format&fit=crop&w=1600&q=80",label:"Flower Petals"},
     {id:4,url:"https://images.unsplash.com/photo-1560750588-73207b31ef5c?auto=format&fit=crop&w=1600&q=80",label:"Essential Oils"},
     {id:5,url:"https://images.unsplash.com/photo-1560750588-73207b31ef5c?auto=format&fit=crop&w=1600&q=80",label:"Towel Fold"},
     {id:6,url:"https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80",label:"Stone Massage"},
-  ]);
+  ];
+  const [gallery,setGallery]=useState(()=>{
+    try{const s=localStorage.getItem("ngalula_gallery");return s?JSON.parse(s):seedGallery;}catch{return seedGallery;}
+  });
+  useEffect(()=>{try{localStorage.setItem("ngalula_gallery",JSON.stringify(gallery));}catch{}},[gallery]);
   const [uploading,setUploading]=useState(false);
   const applyImg=(url)=>{setHeroImageUrl(url);setUrlInput(url);};
   const handleFile=(e)=>{const file=e.target.files?.[0];if(!file)return;setUploading(true);const reader=new FileReader();reader.onload=()=>{const dataUrl=reader.result;setGallery(gg=>[...gg,{id:Date.now(),url:dataUrl,label:file.name.split('.')[0]}]);applyImg(dataUrl);setUploading(false);};reader.readAsDataURL(file);};
