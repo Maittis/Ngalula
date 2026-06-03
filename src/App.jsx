@@ -2309,7 +2309,9 @@ export default function NgalulaUnifiedApp(){
   const [mode,setMode]=useState("client");
   const [bookings,setBookings]=useState(SEED_BOOKINGS.map(b=>({...b,branch:THERAPIST_BRANCH_MAP[b.therapist]||"woodlands"})));
   const [therapists,setTherapists]=useState(SEED_THERAPISTS.map((t,i)=>({...t,branch:i<2?"woodlands":"chilanga"})));
-  const [heroImageUrl,setHeroImageUrl]=useState("https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=1600&q=80");
+  const [heroImageUrl,setHeroImageUrl]=useState(()=>{
+    try{const h=localStorage.getItem("ngalula_hero");return h||"https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=1600&q=80";}catch{return "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=1600&q=80";}
+  });
   const [notifications,setNotifications]=useState([
     {id:1,type:"booking",  msg:"New booking — Natasha Phiri · Couples' Massage",time:"13:00",read:false},
     {id:2,type:"payment",  msg:"Payment received — Yvonne Musonda · K1,100",    time:"12:30",read:false},
@@ -2340,6 +2342,8 @@ export default function NgalulaUnifiedApp(){
     setPulseAdmin(true);
     setTimeout(()=>setPulseAdmin(false),5000);
   },[]);
+
+  useEffect(()=>{try{localStorage.setItem("ngalula_hero",heroImageUrl);}catch{}},[heroImageUrl]);
 
   useEffect(()=>{
     if(secretClicks < 1) return;
