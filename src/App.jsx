@@ -1997,6 +1997,9 @@ function AdminAppearance({heroImageUrl,setHeroImageUrl}){
               <img src={img.url} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
               <div style={{position:"absolute",bottom:0,left:0,right:0,background:"linear-gradient(transparent,rgba(0,0,0,0.7))",padding:"0.2rem 0.4rem",fontSize:"0.6rem",color:"#e8d5b7",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{img.label}</div>
               {heroImageUrl===img.url&&<div style={{position:"absolute",top:"4px",right:"4px",width:"16px",height:"16px",borderRadius:"50%",background:"#c9a96e",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.55rem",fontWeight:700,color:"#0d0b10"}}>✓</div>}
+              <button onClick={e=>{e.stopPropagation();removeFromGallery(img.id);}} style={{position:"absolute",top:"4px",left:"4px",width:"20px",height:"20px",borderRadius:"50%",border:"none",background:"rgba(239,68,68,0.85)",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.6rem",lineHeight:1,opacity:0.7,transition:"opacity 0.15s"}}
+                onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity="0.7"}
+              >🗑</button>
             </div>
           ))}
         </div>
