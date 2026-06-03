@@ -1955,7 +1955,7 @@ function AdminAppearance({heroImageUrl,setHeroImageUrl}){
   const [uploading,setUploading]=useState(false);
   const applyImg=(url)=>{setHeroImageUrl(url);setUrlInput(url);};
   const handleFile=(e)=>{const file=e.target.files?.[0];if(!file)return;setUploading(true);const reader=new FileReader();reader.onload=()=>{const dataUrl=reader.result;setGallery(gg=>[...gg,{id:Date.now(),url:dataUrl,label:file.name.split('.')[0]}]);applyImg(dataUrl);setUploading(false);};reader.readAsDataURL(file);};
-  const removeFromGallery=(id)=>{setGallery(gg=>gg.filter(g=>g.id!==id));};
+  const removeFromGallery=(id,url)=>{setGallery(gg=>gg.filter(g=>g.id!==id));if(heroImageUrl===url){setHeroImageUrl("");setUrlInput("");}};
   const PRESETS=["https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=1600&q=80","https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=1600&q=80","https://images.unsplash.com/photo-1600334123748-f59f43e5c4f6?auto=format&fit=crop&w=1600&q=80","https://images.unsplash.com/photo-1560750588-73207b31ef5c?auto=format&fit=crop&w=1600&q=80"];
   return(
     <div style={{padding:"1.3rem",height:"100%",overflowY:"auto"}}>
@@ -2001,7 +2001,7 @@ function AdminAppearance({heroImageUrl,setHeroImageUrl}){
               <img src={img.url} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
               <div style={{position:"absolute",bottom:0,left:0,right:0,background:"linear-gradient(transparent,rgba(0,0,0,0.7))",padding:"0.2rem 0.4rem",fontSize:"0.6rem",color:"#e8d5b7",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{img.label}</div>
               {heroImageUrl===img.url&&<div style={{position:"absolute",top:"4px",right:"4px",width:"16px",height:"16px",borderRadius:"50%",background:"#c9a96e",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.55rem",fontWeight:700,color:"#0d0b10"}}>✓</div>}
-              <button onClick={e=>{e.stopPropagation();removeFromGallery(img.id);}} style={{position:"absolute",top:"4px",left:"4px",width:"20px",height:"20px",borderRadius:"50%",border:"none",background:"rgba(239,68,68,0.85)",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.6rem",lineHeight:1,opacity:0.7,transition:"opacity 0.15s"}}
+              <button onClick={e=>{e.stopPropagation();removeFromGallery(img.id,img.url);}} style={{position:"absolute",top:"4px",left:"4px",width:"20px",height:"20px",borderRadius:"50%",border:"none",background:"rgba(239,68,68,0.85)",color:"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.6rem",lineHeight:1,opacity:0.7,transition:"opacity 0.15s"}}
                 onMouseEnter={e=>e.currentTarget.style.opacity="1"} onMouseLeave={e=>e.currentTarget.style.opacity="0.7"}
               >🗑</button>
             </div>
