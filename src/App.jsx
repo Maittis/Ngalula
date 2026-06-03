@@ -706,7 +706,7 @@ function ClientApp({bookings,therapists,services,onNewBooking,onSwitchAdmin,hero
 
 const ADMIN_NAV=[{id:"dashboard",icon:"◈",label:"Dashboard"},{id:"bookings",icon:"📋",label:"Bookings"},{id:"extras",icon:"➕",label:"Extras"},{id:"invoices",icon:"🧾",label:"Invoices"},{id:"services",icon:"📦",label:"Services"},{id:"inventory",icon:"📦",label:"Inventory"},{id:"giftcards",icon:"🎁",label:"Gift Cards"},{id:"reports",icon:"📈",label:"Reports"},{id:"appearance",icon:"🎨",label:"Appearance"},{id:"therapists",icon:"👥",label:"Therapists"},{id:"clients",icon:"🧑‍🤝‍🧑",label:"Clients"},{id:"revenue",icon:"📊",label:"Revenue"}];
 
-function Sidebar({view,setView,collapsed,setCollapsed,pending,isSuper}){
+function Sidebar({view,setView,collapsed,setCollapsed,pending,isSuper,currentAdmin,onLogout}){
   return(
     <div style={{width:collapsed?"54px":"206px",background:"#0b0a10",borderRight:"1px solid #16141f",display:"flex",flexDirection:"column",transition:"width 0.22s ease",flexShrink:0,zIndex:10}}>
       <div style={{padding:collapsed?"1rem 0":"1.1rem",borderBottom:"1px solid #16141f",display:"flex",alignItems:"center",gap:"0.6rem",overflow:"hidden"}}>
@@ -729,6 +729,10 @@ function Sidebar({view,setView,collapsed,setCollapsed,pending,isSuper}){
           );
         })}
       </nav>
+      <button onClick={onLogout} style={{display:"flex",alignItems:"center",gap:"0.55rem",padding:collapsed?"0.65rem 0":"0.55rem 0.9rem",border:"none",background:"transparent",cursor:"pointer",borderTop:"1px solid #16141f",justifyContent:collapsed?"center":"flex-start",color:"#ef4444",fontSize:"0.75rem",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap",flexShrink:0}}>
+        <span style={{fontSize:"0.85rem"}}>🚪</span>
+        {!collapsed&&<span>Sign Out</span>}
+      </button>
       <div onClick={()=>setCollapsed(!collapsed)} style={{padding:"0.8rem",borderTop:"1px solid #16141f",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:collapsed?"center":"flex-end",color:"#2a2633"}}>
         <span style={{transform:collapsed?"scaleX(1)":"scaleX(-1)",display:"inline-block",fontSize:"1rem",transition:"transform 0.22s"}}>›</span>
       </div>
@@ -752,13 +756,9 @@ function AdminTopBar({view,unread,onBell,newBookingsCount,currentAdmin,onLogout}
           <span style={{fontSize:"1rem"}}>🔔</span>
           {unread>0&&<span style={{position:"absolute",top:"1px",right:"1px",background:"#ef4444",color:"#fff",borderRadius:"50%",width:"14px",height:"14px",fontSize:"0.48rem",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 6px rgba(239,68,68,0.4)"}}>{unread}</span>}
         </div>
-        <div style={{display:"flex",alignItems:"center",gap:"0.45rem",position:"relative"}}
-          onMouseEnter={e=>e.currentTarget.querySelector('[data-logout]').style.opacity=1}
-          onMouseLeave={e=>e.currentTarget.querySelector('[data-logout]').style.opacity=0}
-        >
+        <div style={{display:"flex",alignItems:"center",gap:"0.45rem"}}>
           <div style={{width:"28px",height:"28px",borderRadius:"50%",background:currentAdmin?.role==="superadmin"?"rgba(201,169,110,0.15)":"rgba(92,219,149,0.1)",border:"1px solid",borderColor:currentAdmin?.role==="superadmin"?"#c9a96e44":"#5cdb9544",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.6rem",color:currentAdmin?.role==="superadmin"?"#c9a96e":"#5cdb95",fontWeight:700}}>{currentAdmin?.id==="superadmin"?"★":currentAdmin?.branch==="woodlands"?"🌳":"🌴"}</div>
           <div><div style={{fontSize:"0.72rem",color:"#a89f8c",lineHeight:1.2}}>{currentAdmin?.name?.split("–")[0]?.trim()||"Admin"}</div>{currentAdmin?.branch!=="*"&&<div style={{fontSize:"0.55rem",color:"#3a3650",textTransform:"uppercase",letterSpacing:"0.07em"}}>{BRANCHES[currentAdmin?.branch]||""}</div>}</div>
-          <button data-logout onClick={onLogout} style={{position:"absolute",right:0,top:"100%",opacity:0,transition:"opacity 0.15s",background:"#1a1823",border:"1px solid #2a2633",borderRadius:"8px",padding:"0.3rem 0.7rem",color:"#ef4444",cursor:"pointer",fontSize:"0.65rem",whiteSpace:"nowrap",zIndex:50,marginTop:"4px",fontFamily:"'DM Sans',sans-serif"}}>Sign Out</button>
         </div>
       </div>
     </div>
@@ -2149,6 +2149,8 @@ function AdminApp({
             setCollapsed={setCollapsed}
             pending={pending}
             isSuper={isSuper}
+            currentAdmin={currentAdmin}
+            onLogout={onLogout}
           />
 
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "visible" }}>
