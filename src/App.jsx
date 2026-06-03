@@ -185,7 +185,7 @@ const ADMIN_USERS = [
 const genRef = () => "NGS-" + Math.random().toString(36).slice(2,8).toUpperCase();
 const genId  = () => Date.now() + Math.floor(Math.random()*9999);
 const fmtDate = d => `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
-const getDates = () => { const out=[]; const d=new Date(); d.setDate(d.getDate()+1); while(out.length<21){if(d.getDay()!==0)out.push(new Date(d));d.setDate(d.getDate()+1);} return out; };
+const getDates = () => { const out=[]; const d=new Date(); while(out.length<21){if(d.getDay()!==0)out.push(new Date(d));d.setDate(d.getDate()+1);} return out; };
 
 // ─── SHARED TINY COMPONENTS ───────────────────────────────────────────────
 const SBadge = ({s}) => { const m=STATUS_META[s]||STATUS_META.pending; return <span style={{padding:"0.17rem 0.55rem",borderRadius:"20px",fontSize:"0.64rem",fontWeight:600,background:m.bg,color:m.c,whiteSpace:"nowrap"}}>{m.l}</span>; };
