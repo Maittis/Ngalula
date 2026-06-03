@@ -704,7 +704,7 @@ function ClientApp({bookings,therapists,services,onNewBooking,onSwitchAdmin,hero
 //  ADMIN PANEL
 // ═══════════════════════════════════════════════════════════════════════════
 
-const ADMIN_NAV=[{id:"dashboard",icon:"◈",label:"Dashboard"},{id:"bookings",icon:"📋",label:"Bookings"},{id:"extras",icon:"➕",label:"Extras"},{id:"invoices",icon:"🧾",label:"Invoices"},{id:"services",icon:"📦",label:"Services"},{id:"inventory",icon:"📦",label:"Inventory"},{id:"giftcards",icon:"🎁",label:"Gift Cards"},{id:"reports",icon:"📈",label:"Reports"},{id:"appearance",icon:"🎨",label:"Appearance"},{id:"therapists",icon:"👥",label:"Therapists"},{id:"clients",icon:"🧑‍🤝‍🧑",label:"Clients"},{id:"revenue",icon:"📊",label:"Revenue"}];
+const ADMIN_NAV=[{id:"dashboard",icon:"◈",label:"Dashboard"},{id:"bookings",icon:"📋",label:"Bookings"},{id:"extras",icon:"➕",label:"Extras"},{id:"invoices",icon:"🧾",label:"Invoices"},{id:"services",icon:"📦",label:"Services"},{id:"inventory",icon:"📦",label:"Inventory"},{id:"giftcards",icon:"🎁",label:"Gift Cards"},{id:"messaging",icon:"📬",label:"Messages"},{id:"reports",icon:"📈",label:"Reports"},{id:"appearance",icon:"🎨",label:"Appearance"},{id:"therapists",icon:"👥",label:"Therapists"},{id:"clients",icon:"🧑‍🤝‍🧑",label:"Clients"},{id:"revenue",icon:"📊",label:"Revenue"}];
 
 function Sidebar({view,setView,collapsed,setCollapsed,pending,isSuper,currentAdmin,onLogout}){
   return(
@@ -713,7 +713,7 @@ function Sidebar({view,setView,collapsed,setCollapsed,pending,isSuper,currentAdm
         <span style={{fontSize:"1.2rem",flexShrink:0,display:"block",textAlign:"center",width:collapsed?"100%":"auto"}}>🌸</span>
         {!collapsed&&<div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"0.95rem",color:"#e8d5b7",fontWeight:600,whiteSpace:"nowrap",letterSpacing:"0.02em"}}>Ngalula Spa</div><div style={{fontSize:"0.54rem",color:"#3a3650",letterSpacing:"0.14em",textTransform:"uppercase"}}>Admin Panel</div></div>}
       </div>
-      <nav style={{flex:1,padding:"0.5rem 0"}}>
+      <nav style={{flex:1,overflowY:"auto",padding:"0.5rem 0"}}>
         {(isSuper ? ADMIN_NAV : ADMIN_NAV.filter(i=>i.id!=="appearance"&&i.id!=="reports")).map(item=>{
           const act=view===item.id;
           return(
@@ -741,7 +741,7 @@ function Sidebar({view,setView,collapsed,setCollapsed,pending,isSuper,currentAdm
 }
 
 function AdminTopBar({view,unread,onBell,newBookingsCount,currentAdmin,onLogout}){
-  const T={dashboard:"Dashboard",bookings:"Bookings",extras:"Extras",invoices:"Invoices",services:"Services",inventory:"Inventory",giftcards:"Gift Cards",reports:"Reports",appearance:"Appearance",therapists:"Therapists",clients:"Clients",revenue:"Revenue & Analytics"};
+  const T={dashboard:"Dashboard",bookings:"Bookings",extras:"Extras",invoices:"Invoices",services:"Services",inventory:"Inventory",giftcards:"Gift Cards",reports:"Reports",appearance:"Appearance",therapists:"Therapists",clients:"Clients",revenue:"Revenue & Analytics",messaging:"Communications"};
   return(
     <div style={{height:"50px",background:"#0b0a10",borderBottom:"1px solid #16141f",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 1.3rem",flexShrink:0}}>
       <div style={{display:"flex",alignItems:"center",gap:"0.8rem"}}>
@@ -1937,6 +1937,84 @@ function AdminGiftCards({giftCards,setGiftCards,currentAdmin}){
   );
 }
 
+// Communications / Messaging
+function AdminMessaging({bookings,currentAdmin}){
+  const today=new Date().toISOString().slice(0,10);
+  const [tab,setTab]=useState("reminders");
+  const [bdayName,setBdayName]=useState("");
+  const [bdayContact,setBdayContact]=useState("");
+  const [bdayMode,setBdayMode]=useState("whatsapp");
+  const upBookings=bookings.filter(b=>b.date>=today&&b.status!=="cancelled").sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+  const clients=[...new Map(upBookings.map(b=>[b.client,b])).values()].filter(c=>c.phone||c.email);
+  const enc=(s)=>encodeURIComponent(s);
+  const wapp=(phone,msg)=>phone?`https://wa.me/${phone.replace(/[^0-9]/g,"")}?text=${enc(msg)}`:"#";
+  const emailLink=(addr,sub,body)=>addr?`mailto:${addr}?subject=${enc(sub)}&body=${enc(body)}`:"#";
+  const remMsg="Hello! This is a friendly reminder about your upcoming appointment at Ngalula Spa. We look forward to welcoming you! Kindly confirm or call us if you need to reschedule.";
+  const bdayMsg="Happy Birthday! 🎂 Wishing you a wonderful day filled with joy and relaxation. As a special treat, visit Ngalula Spa for a complimentary glass of bubbly on us!";
+  return(
+    <div style={{padding:"1.3rem",height:"100%",overflowY:"auto"}}>
+      <div style={{marginBottom:"1rem"}}>
+        <h3 style={{margin:"0 0 0.15rem",fontFamily:"'Cormorant Garamond',serif",fontSize:"1.1rem",color:"#e8d5b7"}}>📬 Communications</h3>
+        <p style={{margin:0,fontSize:"0.7rem",color:"#3a3650"}}>Send reminders & birthday wishes via WhatsApp or Email</p>
+      </div>
+      <div style={{display:"flex",gap:"0.5rem",marginBottom:"1rem"}}>
+        {[{id:"reminders",l:"📅 Reminders"},{id:"birthday",l:"🎂 Birthday Wishes"}].map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"0.5rem 1rem",borderRadius:"8px",border:"none",cursor:"pointer",fontSize:"0.75rem",fontWeight:600,fontFamily:"'DM Sans',sans-serif",background:tab===t.id?"#c9a96e":"#13111a",color:tab===t.id?"#0d0b10":"#5a5060",transition:"all 0.15s"}}>{t.l}</button>
+        ))}
+      </div>
+      {tab==="reminders"?(
+        <div style={{background:"#0f0d14",border:"1px solid #1e1c26",borderRadius:"14px",padding:"1rem"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"0.8rem"}}>
+            <div style={{fontWeight:600,fontSize:"0.82rem",color:"#c8c0b0"}}>Upcoming Bookings</div>
+            <span style={{fontSize:"0.65rem",color:"#3a3650"}}>{upBookings.length} upcoming</span>
+          </div>
+          {upBookings.length===0?<div style={{padding:"2rem",textAlign:"center",color:"#2a2633",fontSize:"0.8rem"}}>No upcoming bookings</div>:
+            upBookings.map(b=>(
+              <div key={b.id} style={{borderBottom:"1px solid #16141f",padding:"0.7rem 0",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"0.5rem"}}>
+                <div style={{flex:"1 1 160px"}}>
+                  <div style={{fontSize:"0.78rem",color:"#c8c0b0",fontWeight:500}}>{b.client}</div>
+                  <div style={{fontSize:"0.65rem",color:"#4a4560"}}>{b.service} · {b.date} {b.time}</div>
+                  <div style={{fontSize:"0.6rem",color:"#2a2633"}}>{b.phone||"No phone"} {b.email?`· ${b.email}`:""}</div>
+                </div>
+                <div style={{display:"flex",gap:"0.4rem",flexWrap:"wrap"}}>
+                  <a href={wapp(b.phone,remMsg)} target="_blank" rel="noopener noreferrer" style={{padding:"0.4rem 0.7rem",borderRadius:"7px",border:"none",background:"rgba(37,211,102,0.12)",color:"#25d366",cursor:"pointer",fontSize:"0.68rem",fontWeight:600,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"0.3rem",pointerEvents:b.phone?"auto":"none",opacity:b.phone?1:0.35}}>💬 WhatsApp</a>
+                  <a href={emailLink(b.email,"Reminder – Ngalula Spa Appointment",remMsg)} target="_blank" rel="noopener noreferrer" style={{padding:"0.4rem 0.7rem",borderRadius:"7px",border:"none",background:"rgba(66,133,244,0.1)",color:"#4285f4",cursor:"pointer",fontSize:"0.68rem",fontWeight:600,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"0.3rem",pointerEvents:b.email?"auto":"none",opacity:b.email?1:0.35}}>✉ Email</a>
+                </div>
+              </div>
+            ))}
+        </div>
+      ):(
+        <div style={{background:"#0f0d14",border:"1px solid #1e1c26",borderRadius:"14px",padding:"1rem"}}>
+          <div style={{fontWeight:600,fontSize:"0.82rem",color:"#c8c0b0",marginBottom:"0.8rem"}}>🎂 Send Birthday Wishes</div>
+          <div style={{marginBottom:"0.7rem"}}>
+            <label style={{display:"block",fontSize:"0.63rem",color:"#8a7f70",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:"0.3rem"}}>Client Name</label>
+            <input value={bdayName} onChange={e=>setBdayName(e.target.value)} placeholder="e.g. Elizabeth" style={{width:"100%",boxSizing:"border-box",padding:"0.6rem 0.8rem",borderRadius:"8px",border:"1px solid #1e1c26",background:"#0d0c13",color:"#e8d5b7",outline:"none",fontFamily:"'DM Sans',sans-serif",fontSize:"0.78rem"}}/>
+          </div>
+          <div style={{marginBottom:"0.7rem"}}>
+            <label style={{display:"block",fontSize:"0.63rem",color:"#8a7f70",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:"0.3rem"}}>Phone or Email</label>
+            <input value={bdayContact} onChange={e=>setBdayContact(e.target.value)} placeholder="+260 97 XXX XXXX or email@example.com" style={{width:"100%",boxSizing:"border-box",padding:"0.6rem 0.8rem",borderRadius:"8px",border:"1px solid #1e1c26",background:"#0d0c13",color:"#e8d5b7",outline:"none",fontFamily:"'DM Sans',sans-serif",fontSize:"0.78rem"}}/>
+          </div>
+          <div style={{display:"flex",gap:"0.5rem",marginBottom:"0.7rem"}}>
+            {[{id:"whatsapp",l:"💬 WhatsApp"},{id:"email",l:"✉ Email"}].map(m=>(
+              <button key={m.id} onClick={()=>setBdayMode(m.id)} style={{padding:"0.4rem 0.8rem",borderRadius:"6px",border:"none",cursor:"pointer",fontSize:"0.7rem",fontWeight:600,fontFamily:"'DM Sans',sans-serif",background:bdayMode===m.id?"#c9a96e":"#13111a",color:bdayMode===m.id?"#0d0b10":"#5a5060"}}>{m.l}</button>
+            ))}
+          </div>
+          {bdayName&&bdayContact?(bdayMode==="whatsapp"?(
+            <a href={wapp(bdayContact.replace(/[^0-9]/g,"").startsWith("260")?bdayContact:`260${bdayContact.replace(/[^0-9]/g,"")}`,bdayMsg.replace("🎂","").trim())} target="_blank" rel="noopener noreferrer" style={{display:"block",textAlign:"center",padding:"0.6rem",borderRadius:"8px",border:"none",background:"rgba(37,211,102,0.12)",color:"#25d366",cursor:"pointer",fontSize:"0.78rem",fontWeight:600,textDecoration:"none"}}>💬 Send Birthday WhatsApp</a>
+          ):(
+            <a href={emailLink(bdayContact,"Happy Birthday from Ngalula Spa! 🎂",bdayMsg)} target="_blank" rel="noopener noreferrer" style={{display:"block",textAlign:"center",padding:"0.6rem",borderRadius:"8px",border:"none",background:"rgba(66,133,244,0.1)",color:"#4285f4",cursor:"pointer",fontSize:"0.78rem",fontWeight:600,textDecoration:"none"}}>✉ Send Birthday Email</a>
+          )):(
+            <div style={{padding:"1rem",textAlign:"center",color:"#2a2633",fontSize:"0.72rem",border:"1px dashed #1e1c26",borderRadius:"8px"}}>Enter a name and contact to send wishes</div>
+          )}
+          <div style={{marginTop:"0.8rem",padding:"0.6rem",background:"rgba(201,169,110,0.04)",borderRadius:"8px",fontSize:"0.64rem",color:"#5a5060",lineHeight:1.5}}>
+            <strong style={{color:"#c9a96e"}}>Template:</strong> {bdayMsg}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Appearance Manager
 function AdminAppearance({heroImageUrl,setHeroImageUrl}){
   const [urlInput,setUrlInput]=useState(heroImageUrl||"");
@@ -2220,6 +2298,9 @@ function AdminApp({
 
             {view === "giftcards" && (
               <AdminGiftCards giftCards={giftCards} setGiftCards={setGiftCards} currentAdmin={currentAdmin} />
+            )}
+            {view === "messaging" && (
+              <AdminMessaging bookings={bFilter(safeBookings)} currentAdmin={currentAdmin} />
             )}
             {view === "reports" && isSuper && (
               <AdminReports bookings={safeBookings} therapists={therapists} services={services} />
